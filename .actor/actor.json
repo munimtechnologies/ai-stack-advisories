@@ -1,0 +1,13 @@
+{
+  "actorSpecification": 1,
+  "name": "ai-stack-advisories",
+  "title": "Self-hosted AI Stack Vulnerability Check",
+  "version": "0.0",
+  "dockerfile": "../Dockerfile",
+  "input": "../INPUT_SCHEMA.json",
+  "readme": "../README.md",
+  "output": "./output_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  }
+}

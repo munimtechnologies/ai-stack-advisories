@@ -1,0 +1,12 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "Advisory check results",
+  "properties": {
+    "results": {
+      "type": "string",
+      "title": "Results",
+      "description": "One item per checked component: status, advisory count, max severity and the version to upgrade to.",
+      "template": "{{links.apiDefaultDatasetUrl}}/items?view=overview"
+    }
+  }
+}

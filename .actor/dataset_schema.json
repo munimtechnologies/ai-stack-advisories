@@ -1,0 +1,26 @@
+{
+  "actorSpecification": 1,
+  "fields": {},
+  "views": {
+    "overview": {
+      "title": "Overview",
+      "transformation": {
+        "fields": ["component", "product", "status", "advisoryCount", "maxSeverity", "upgradeTo", "noFixedReleaseCount", "notInPublicDatabasesCount", "note"]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "component": { "label": "Component" },
+          "product": { "label": "Product" },
+          "status": { "label": "Status" },
+          "advisoryCount": { "label": "Advisories", "format": "number" },
+          "maxSeverity": { "label": "Max severity" },
+          "upgradeTo": { "label": "Upgrade to" },
+          "noFixedReleaseCount": { "label": "No fix yet", "format": "number" },
+          "notInPublicDatabasesCount": { "label": "Not in public databases", "format": "number" },
+          "note": { "label": "Note" }
+        }
+      }
+    }
+  }
+}
