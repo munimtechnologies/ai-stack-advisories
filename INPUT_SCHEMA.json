@@ -6,9 +6,9 @@
     "components": {
       "title": "Components and versions",
       "type": "array",
-      "description": "One per line, as name@version. Built-in products: Ollama, Open WebUI, Langflow, Flowise, LiteLLM, n8n, Dify, RAGFlow, ComfyUI, MCP Inspector (for example n8n@2.40.0 or \"Open WebUI 0.11.2\"). Any other package: prefix its ecosystem, for example pypi:requests@2.31.0 or npm:express@4.17.1.",
+      "description": "One per line, as name@version. Built-in products: Ollama, Open WebUI, Langflow, Flowise, LiteLLM, n8n, Dify, RAGFlow, AnythingLLM, ComfyUI, MCP Inspector (for example n8n@2.40.0 or \"Open WebUI 0.11.2\"). Any other package: prefix its ecosystem, for example pypi:requests@2.31.0 or npm:express@4.17.1.",
       "editor": "stringList",
-      "prefill": ["ollama@0.34.5", "open-webui@0.11.2", "n8n@2.40.0", "langflow@1.10.2", "litellm@1.82.7", "flowise@3.1.4", "dify@1.13.3", "ragflow@0.27.2"]
+      "prefill": ["ollama@0.34.5", "open-webui@0.11.2", "n8n@2.40.0", "langflow@1.10.2", "litellm@1.82.7", "flowise@3.1.4", "dify@1.13.3", "ragflow@0.27.2", "anythingllm@1.16.1"]
     },
     "useOsv": {
       "title": "Also query OSV.dev",

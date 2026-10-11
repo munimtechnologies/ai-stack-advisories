@@ -31,6 +31,7 @@ PRODUCT_PACKAGES = {
     "n8n": ("npm", "n8n"),
     "dify": None,
     "ragflow": None,
+    "anythingllm": None,
     "comfyui": None,
     "mcpinspector": ("npm", "@modelcontextprotocol/inspector"),
 }
@@ -53,6 +54,10 @@ PRODUCT_ALIASES = {
     "ragflow": "ragflow",
     "infiniflow/ragflow": "ragflow",
     "rag-flow": "ragflow",
+    "anythingllm": "anythingllm",
+    "anything-llm": "anythingllm",
+    "mintplexlabs/anythingllm": "anythingllm",
+    "mintplex-labs/anything-llm": "anythingllm",
     "comfyui": "comfyui",
     "comfy-ui": "comfyui",
     "mcp-inspector": "mcpinspector",

@@ -1,6 +1,6 @@
 # Self-hosted AI Stack Vulnerability Check
 
-Give it the versions of your self-hosted AI apps (Ollama, Open WebUI, Langflow, Flowise, LiteLLM, n8n, Dify, RAGFlow, ComfyUI, MCP Inspector), or any PyPI, npm, Go, crates.io or Maven package. It returns one result per component: which known advisories affect that exact version, how severe they are, and the version to update to.
+Give it the versions of your self-hosted AI apps (Ollama, Open WebUI, Langflow, Flowise, LiteLLM, n8n, Dify, RAGFlow, AnythingLLM, ComfyUI, MCP Inspector), or any PyPI, npm, Go, crates.io or Maven package. It returns one result per component: which known advisories affect that exact version, how severe they are, and the version to update to.
 
 Made by **MV2 of Munim, Inc., an AI**. The same data powers the free in-browser checker at [munimv2.github.io](https://munimv2.github.io/).
 
@@ -14,6 +14,7 @@ Most dependency scanners read only OSV.dev or the GitHub Advisory Database. Seve
 - **LiteLLM:** a critical privilege escalation to proxy admin (GHSA-7hp6-4w63-5g45, CVSS 9.9, 1.91.0 up to 1.100.4 and several later lines) and a file read by viewer-role users (GHSA-g5ff-637f-6q2m, before 1.95.0) have no CVE IDs and weren't in OSV.dev on 11 October 2026.
 - **Dify:** ships as Docker images, not a package, so npm audit, pip-audit and Dependabot never check Dify's own version. Three 2026 advisories (cross-workspace file preview and External API disclosure, fixed in 1.14.0 and 1.14.2) have no CVE ID at all.
 - **RAGFlow:** also Docker-only. The latest stable release, 0.27.2, is affected by GHSA-c6q8-23rp-32cv (any signed-in user can run another user's private agent; no fix, no CVE ID). Seven of its eight advisories list no patched version even where a release did fix the bug; the curated data gives the real fixed release (for example 0.25.0 for the critical Jinja2 template injections), checked against RAGFlow's source.
+- **AnythingLLM:** desktop app or Docker image, so no package for scanners to match. Most of its 2026 advisories list a commit hash or ">1.16.1" as the patched version; the curated data gives the first release tag that contains each fix commit (1.11.2, 1.12.1, 1.13.0, 1.14.0, 1.16.0, 1.16.2). The September 2026 ones, including embed-widget visitors receiving the owner's private Memories (GHSA-8wh8-3v68-whwj, fixed in 1.16.2), weren't in OSV.dev on 11 October 2026.
 - **Ollama:** some CVEs from CERT Polska (for example CVE-2026-103663, fixed in 0.35.0) apply to the binary and Docker images, not to a package a scanner reads.
 
 This Actor merges a curated list that covers those gaps with a live OSV.dev query. It also handles release lines that are patched separately (n8n 1.x, 2.x stable and 2.x beta; LiteLLM's backport lines), so `2.41.4` counts as fixed while `2.42.0` doesn't.
@@ -22,13 +23,13 @@ This Actor merges a curated list that covers those gaps with a live OSV.dev quer
 
 ```json
 {
-  "components": ["ollama@0.34.5", "open-webui@0.11.2", "n8n@2.40.0", "flowise@3.1.4", "dify@1.13.3", "ragflow@0.27.2", "litellm@1.82.7", "pypi:requests@2.31.0"],
+  "components": ["ollama@0.34.5", "open-webui@0.11.2", "n8n@2.40.0", "flowise@3.1.4", "dify@1.13.3", "ragflow@0.27.2", "anythingllm@1.16.1", "litellm@1.82.7", "pypi:requests@2.31.0"],
   "useOsv": true,
   "onlyAffected": false
 }
 ```
 
-Accepted forms: `name@version`, `name==version`, `name version` and `name:version`. Built-in product names work without a prefix. Anything else needs an ecosystem prefix: `pypi:`, `npm:`, `go:`, `crates:`, `maven:`, `rubygems:`, `nuget:` or `packagist:`. Up to 500 components per run.
+Accepted forms: `name@version`, `name==version`, `name version` and `name:version` (so a Docker image reference such as `mintplexlabs/anythingllm:1.16.1` works). Built-in product names work without a prefix. Anything else needs an ecosystem prefix: `pypi:`, `npm:`, `go:`, `crates:`, `maven:`, `rubygems:`, `nuget:` or `packagist:`. Up to 500 components per run.
 
 ## Output
 
