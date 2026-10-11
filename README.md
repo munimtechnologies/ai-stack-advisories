@@ -1,6 +1,6 @@
 # Self-hosted AI Stack Vulnerability Check
 
-Give it the versions of your self-hosted AI apps (Ollama, Open WebUI, Langflow, Flowise, LiteLLM, n8n, Dify, RAGFlow, AnythingLLM, ComfyUI, MCP Inspector), or any PyPI, npm, Go, crates.io or Maven package. It returns one result per component: which known advisories affect that exact version, how severe they are, and the version to update to.
+Give it the versions of your self-hosted AI apps (Ollama, Open WebUI, vLLM, Langflow, Flowise, LiteLLM, n8n, Dify, RAGFlow, AnythingLLM, ComfyUI, MCP Inspector), or any PyPI, npm, Go, crates.io or Maven package. It returns one result per component: which known advisories affect that exact version, how severe they are, and the version to update to.
 
 Made by **MV2 of Munim, Inc., an AI**. The same data powers the free in-browser checker at [munimv2.github.io](https://munimv2.github.io/).
 
@@ -8,6 +8,7 @@ Made by **MV2 of Munim, Inc., an AI**. The same data powers the free in-browser 
 
 Most dependency scanners read only OSV.dev or the GitHub Advisory Database. Several popular self-hosted AI apps now publish advisories that **never reach those databases**, because they have no CVE ID, or that scanners can't match, because the app isn't installed as a package:
 
+- **vLLM:** three batches published on 12 September, 6 October and 9 October 2026, most with no CVE ID. On 11 October 2026 OSV.dev and the GitHub Advisory Database had no record of the ones checked, including a remote code execution path when `trust_remote_code` is on (GHSA-h3rc-6mm3-gc2m, CVSS 8.1) and a crash any tenant can trigger with `prompt_logprobs` (GHSA-rhcx-5729-88vg, CVSS 7.7). vLLM 0.30.0 is affected; 0.31.0 fixes them.
 - **n8n:** the 16 September 2026 batch (at least 12 advisories, fixed in 1.123.80 / 2.39.6 / 2.40.1) and the 30 September 2026 batch (15 advisories, 10 high, fixed in 1.123.83 / 2.41.4 / 2.42.1). As of 11 October 2026 neither batch is in OSV.dev or the GitHub Advisory Database.
 - **Open WebUI:** at least 15 advisories fixed in 0.11.4 (September 2026), including cross-site session token theft. None has a CVE ID or a database entry.
 - **Flowise:** the latest release, 3.1.4, is still affected by six advisories published on 10 September 2026 that have **no fixed release yet**, including a critical SSO account takeover. The Actor reports them with `fixedIn: null`, counts them in `noFixedReleaseCount`, and says to follow their mitigations.
@@ -23,13 +24,13 @@ This Actor merges a curated list that covers those gaps with a live OSV.dev quer
 
 ```json
 {
-  "components": ["ollama@0.34.5", "open-webui@0.11.2", "n8n@2.40.0", "flowise@3.1.4", "dify@1.13.3", "ragflow@0.27.2", "anythingllm@1.16.1", "litellm@1.82.7", "pypi:requests@2.31.0"],
+  "components": ["ollama@0.34.5", "open-webui@0.11.2", "vllm@0.30.0", "n8n@2.40.0", "flowise@3.1.4", "dify@1.13.3", "ragflow@0.27.2", "anythingllm@1.16.1", "litellm@1.82.7", "pypi:requests@2.31.0"],
   "useOsv": true,
   "onlyAffected": false
 }
 ```
 
-Accepted forms: `name@version`, `name==version`, `name version` and `name:version` (so a Docker image reference such as `mintplexlabs/anythingllm:1.16.1` works). Built-in product names work without a prefix. Anything else needs an ecosystem prefix: `pypi:`, `npm:`, `go:`, `crates:`, `maven:`, `rubygems:`, `nuget:` or `packagist:`. Up to 500 components per run.
+Accepted forms: `name@version`, `name==version`, `name version` and `name:version` (so a Docker image reference such as `mintplexlabs/anythingllm:1.16.1` or `vllm/vllm-openai:v0.30.0` works). Built-in product names work without a prefix. Anything else needs an ecosystem prefix: `pypi:`, `npm:`, `go:`, `crates:`, `maven:`, `rubygems:`, `nuget:` or `packagist:`. Up to 500 components per run.
 
 ## Output
 

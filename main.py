@@ -25,6 +25,7 @@ MAX_COMPONENTS = 500
 PRODUCT_PACKAGES = {
     "ollama": ("Go", "github.com/ollama/ollama"),
     "openwebui": ("PyPI", "open-webui"),
+    "vllm": ("PyPI", "vllm"),
     "langflow": ("PyPI", "langflow"),
     "flowise": ("npm", "flowise"),
     "litellm": ("PyPI", "litellm"),
@@ -42,6 +43,9 @@ PRODUCT_ALIASES = {
     "github.com/ollama/ollama": "ollama",
     "open-webui": "openwebui",
     "openwebui": "openwebui",
+    "vllm": "vllm",
+    "vllm-openai": "vllm",
+    "vllm/vllm-openai": "vllm",
     "langflow": "langflow",
     "flowise": "flowise",
     "litellm": "litellm",
