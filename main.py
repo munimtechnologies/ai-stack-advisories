@@ -21,6 +21,9 @@ CURATED = json.loads((HERE / "advisories.json").read_text(encoding="utf-8"))
 OSV_QUERY_URL = "https://api.osv.dev/v1/query"
 MAX_COMPONENTS = 500
 
+# Checked when a run starts with no components (API calls, scheduled tests), so it still shows real output.
+EXAMPLE_COMPONENTS = ["ollama@0.34.5", "open-webui@0.11.2", "vllm@0.30.0", "n8n@2.40.0", "flowise@3.1.4"]
+
 # Curated product key -> OSV (ecosystem, package name), or None when there is no package.
 PRODUCT_PACKAGES = {
     "ollama": ("Go", "github.com/ollama/ollama"),
@@ -286,16 +289,30 @@ async def check_component(client, raw, use_osv):
     return out
 
 
+async def safe_check(client, raw, use_osv):
+    """One odd component becomes an error item instead of failing the whole run."""
+    try:
+        return await check_component(client, raw, use_osv)
+    except Exception as e:  # noqa: BLE001
+        Actor.log.exception(f"Checking {raw!r} failed")
+        return {"component": raw, "checkedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "curatedDataAsOf": CURATED["checked"], "status": "error",
+                "error": f"Internal error while checking this component ({type(e).__name__}). Please report it at https://github.com/munimv2/ai-stack-advisories/issues."}
+
+
 async def main():
     async with Actor:
         inp = await Actor.get_input() or {}
-        components = [c for c in (inp.get("components") or []) if str(c).strip()]
+        raw = inp.get("components") or []
+        if isinstance(raw, str):
+            raw = raw.splitlines()
+        components = [str(c).strip() for c in raw if str(c).strip()]
         use_osv = inp.get("useOsv", True)
         only_affected = inp.get("onlyAffected", False)
-        if not components:
-            Actor.log.error("No components given.")
-            await Actor.set_status_message("Add at least one component, for example ollama@0.34.5.")
-            return
+        example_run = not components
+        if example_run:
+            Actor.log.warning("No components given, so checking example components. Add your own, for example ollama@0.34.5.")
+            components = list(EXAMPLE_COMPONENTS)
         if len(components) > MAX_COMPONENTS:
             Actor.log.warning(f"Only the first {MAX_COMPONENTS} components are checked.")
             components = components[:MAX_COMPONENTS]
@@ -305,7 +322,7 @@ async def main():
         async with httpx.AsyncClient(headers=headers) as client:
             async def run(c):
                 async with sem:
-                    return await check_component(client, str(c), use_osv)
+                    return await safe_check(client, c, use_osv)
             results = await asyncio.gather(*(run(c) for c in components))
 
         pushed = 0
@@ -315,7 +332,10 @@ async def main():
             await Actor.push_data(r)
             pushed += 1
         affected = sum(1 for r in results if r["status"] == "affected")
-        await Actor.set_status_message(f"Checked {len(results)} components: {affected} affected. {pushed} items saved.")
+        msg = f"Checked {len(results)} components: {affected} affected. {pushed} items saved."
+        if example_run:
+            msg = "No components given, so these are example results. " + msg
+        await Actor.set_status_message(msg)
 
 
 if __name__ == "__main__":
