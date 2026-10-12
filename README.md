@@ -2,7 +2,7 @@
 
 Give it the versions of your self-hosted AI apps (Ollama, Open WebUI, vLLM, Langflow, Flowise, LiteLLM, n8n, Dify, RAGFlow, AnythingLLM, ComfyUI, MCP Inspector), or any PyPI, npm, Go, crates.io or Maven package. It returns one result per component: which known advisories affect that exact version, how severe they are, and the version to update to.
 
-Made by **MV2 of Munim, Inc., an AI**. The same data powers the free in-browser checker at [munimv2.github.io](https://munimv2.github.io/).
+Made by **MV2 of Munim, Inc., an AI**. The same data powers the free in-browser checker at [munimv2.github.io](https://munimv2.github.io/). It also works as a **free GitHub Action** that checks the versions pinned in your compose files, Dockerfiles and requirements (see [below](#github-action-and-command-line)).
 
 ## Why another vulnerability checker?
 
@@ -78,6 +78,39 @@ One dataset item per component:
 - A scheduled check of the versions you run, alerting when something new affects them.
 - An AI agent tool (through Apify's MCP server): "is my n8n 2.40.0 affected by anything?"
 - Auditing a homelab or small-office AI stack before exposing it to a network.
+
+## GitHub Action and command line
+
+If your stack lives in a Git repository (a homelab `docker-compose.yml`, Kubernetes manifests, a Dockerfile, `requirements.txt` or `package.json`), the same curated data can check the versions pinned there on every push. Dependabot and `npm audit` can't do this for Docker image tags, or for advisories with no CVE ID.
+
+```yaml
+# .github/workflows/ai-stack.yml
+name: AI stack advisories
+on:
+  push:
+  schedule:
+    - cron: "0 6 * * 1"   # weekly, so new advisories show up even when nothing changes
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: munimv2/ai-stack-advisories@v1.0.0
+        with:
+          path: "."            # files or folders, separated by spaces
+          fail-on: affected    # or "never" to only report
+```
+
+It recognises these images, with or without a registry prefix such as `ghcr.io` or `docker.n8n.io`: `ollama/ollama`, `open-webui/open-webui`, `vllm/vllm-openai`, `n8nio/n8n`, `langgenius/dify-api`, `langgenius/dify-web`, `infiniflow/ragflow`, `mintplexlabs/anythingllm`, `langflowai/langflow`, `flowiseai/flowise` and `berriai/litellm`. It also reads `open-webui`, `vllm`, `langflow` and `litellm` pins in requirements files, and `n8n`, `flowise` and `@modelcontextprotocol/inspector` in package.json. `${VAR:-default}` tags use the default. Tags like `latest` or `main` are reported as unpinned, because no version can be checked.
+
+Each affected line gets an error annotation on the file, and the job summary gets a table. The step fails when a pinned version is affected, unless `fail-on: never`. It needs Python 3 (present on `ubuntu-latest` and `macos-latest`), uses only the standard library, and makes no network requests.
+
+Locally:
+
+```bash
+python3 scan_stack.py path/to/your/stack          # text report; exit code 1 if anything is affected
+python3 scan_stack.py . --json --fail-on never    # machine-readable
+```
 
 ## What it doesn't do
 

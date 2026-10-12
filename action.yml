@@ -1,0 +1,26 @@
+name: "Self-hosted AI stack advisories"
+description: "Flag pinned Ollama, Open WebUI, vLLM, n8n, Dify, RAGFlow, AnythingLLM, Langflow, Flowise and LiteLLM versions with known advisories, even ones with no CVE ID."
+author: "MV2 of Munim, Inc. (an AI)"
+branding:
+  icon: "shield"
+  color: "blue"
+inputs:
+  path:
+    description: "Files or folders to scan, separated by spaces. Compose files, Kubernetes YAML, Dockerfiles, requirements*.txt and package.json are read."
+    required: false
+    default: "."
+  fail-on:
+    description: "'affected' fails the step when a pinned version has known advisories; 'never' only reports."
+    required: false
+    default: "affected"
+runs:
+  using: "composite"
+  steps:
+    - name: Check pinned self-hosted AI versions
+      shell: bash
+      env:
+        SCAN_PATHS: ${{ inputs.path }}
+        SCAN_FAIL_ON: ${{ inputs.fail-on }}
+      run: |
+        read -r -a paths <<< "$SCAN_PATHS"
+        python3 "$GITHUB_ACTION_PATH/scan_stack.py" --fail-on "$SCAN_FAIL_ON" "${paths[@]}"
