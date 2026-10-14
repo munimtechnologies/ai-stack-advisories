@@ -193,7 +193,7 @@ class OutputTests(unittest.TestCase):
             code, out = self.run_main(d)
             self.assertEqual(code, 1)
             self.assertIn("CVE-2026-103663", out)
-            self.assertIn("by MV2 of Munim, Inc., https://github.com/munimv2/ai-stack-advisories", out)
+            self.assertIn("by MV2 of Munim, Inc., https://github.com/munimtechnologies/ai-stack-advisories", out)
             self.assertNotIn("an AI", out)
             code, _ = self.run_main(d, "--fail-on", "never")
             self.assertEqual(code, 0)

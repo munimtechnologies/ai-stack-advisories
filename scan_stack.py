@@ -251,7 +251,7 @@ def format_text(findings, data):
     affected = sum(1 for f in findings if f["status"] == "affected")
     out.append(f"Checked {len(findings)} pinned self-hosted AI component(s): {affected} affected. "
                f"Curated data as of {data.get('checked', '?')}; by MV2 of Munim, Inc., "
-               "https://github.com/munimv2/ai-stack-advisories")
+               "https://github.com/munimtechnologies/ai-stack-advisories")
     return "\n".join(out)
 
 

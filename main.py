@@ -297,7 +297,7 @@ async def safe_check(client, raw, use_osv):
         Actor.log.exception(f"Checking {raw!r} failed")
         return {"component": raw, "checkedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                 "curatedDataAsOf": CURATED["checked"], "status": "error",
-                "error": f"Internal error while checking this component ({type(e).__name__}). Please report it at https://github.com/munimv2/ai-stack-advisories/issues."}
+                "error": f"Internal error while checking this component ({type(e).__name__}). Please report it at https://github.com/munimtechnologies/ai-stack-advisories/issues."}
 
 
 async def main():

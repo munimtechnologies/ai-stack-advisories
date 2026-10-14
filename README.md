@@ -96,13 +96,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: munimv2/ai-stack-advisories@v1.1.0
+      - uses: munimtechnologies/ai-stack-advisories@v1.1.0
         with:
           path: "."            # files or folders, separated by spaces
           fail-on: affected    # or "never" to only report
 ```
 
-The curated data ships inside each release, so a pinned tag keeps the data it was released with. Use the newest tag from the [releases page](https://github.com/munimv2/ai-stack-advisories/releases) (or `@main` for the latest data, at the cost of not pinning the code).
+The curated data ships inside each release, so a pinned tag keeps the data it was released with. Use the newest tag from the [releases page](https://github.com/munimtechnologies/ai-stack-advisories/releases) (or `@main` for the latest data, at the cost of not pinning the code).
 
 It recognises these images, with or without a registry prefix such as `ghcr.io` or `docker.n8n.io`: `ollama/ollama`, `open-webui/open-webui`, `vllm/vllm-openai`, `n8nio/n8n`, `langgenius/dify-api`, `langgenius/dify-web`, `infiniflow/ragflow`, `mintplexlabs/anythingllm`, `langflowai/langflow`, `flowiseai/flowise` and `berriai/litellm`. It also reads `open-webui`, `vllm`, `langflow` and `litellm` pins in requirements files, and `n8n`, `flowise` and `@modelcontextprotocol/inspector` in package.json. `${VAR:-default}` tags use the default. Tags like `latest` or `main` are reported as unpinned, because no version can be checked.
 
@@ -120,12 +120,12 @@ python3 scan_stack.py . --json --fail-on never    # machine-readable
 - `advisories.json` is the curated list (144 version-range entries on 14 October 2026). Its `checked` field is the date of the last full sweep.
 - `check_freshness.py` (standard library only) pages through each covered project's published GitHub security advisories and lists any whose GHSA and CVE IDs are not in the feed, saying whether existing entries already flag the affected versions: `python3 check_freshness.py` (set `GITHUB_TOKEN` for a higher rate limit).
 - Advisories found between merges go into `pending-advisories.json` in the same format. On 14 October 2026 all 14 pending advisories were merged, and the file is empty.
-- A datasheet with coverage, sources and known limitations: [munimv2/data-products](https://github.com/munimv2/data-products/blob/main/products/self-hosted-ai-advisories.md).
+- A datasheet with coverage, sources and known limitations: [munimtechnologies/data-products](https://github.com/munimtechnologies/data-products/blob/main/products/self-hosted-ai-advisories.md).
 
 ## What it doesn't do
 
 - It never connects to your servers or scans networks. It only compares version numbers with advisory data.
-- It can't see configuration. A version with no known advisories can still be unsafe if it's exposed without authentication. For a local machine, the free, read-only [local-ai-checkup](https://github.com/munimv2/local-ai-checkup) script checks ports and risky settings as well.
-- The curated list is checked by hand (date in `curatedDataAsOf`). If a range looks wrong, please open an issue at [github.com/munimv2/local-ai-checkup](https://github.com/munimv2/local-ai-checkup/issues).
+- It can't see configuration. A version with no known advisories can still be unsafe if it's exposed without authentication. For a local machine, the free, read-only [local-ai-checkup](https://github.com/munimtechnologies/local-ai-checkup) script checks ports and risky settings as well.
+- The curated list is checked by hand (date in `curatedDataAsOf`). If a range looks wrong, please open an issue at [github.com/munimtechnologies/local-ai-checkup](https://github.com/munimtechnologies/local-ai-checkup/issues).
 
 This is general technical information, not a security certification or professional advice.
