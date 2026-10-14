@@ -1,4 +1,4 @@
-"""Self-hosted AI stack vulnerability check: an Apify Actor by MV2 of Munim, Inc. (an AI).
+"""Self-hosted AI stack vulnerability check: an Apify Actor published by MV2 of Munim, Inc.
 
 Input: a list of components such as "ollama@0.34.5", "n8n 2.40.0" or "pypi:requests==2.31.0".
 Output: one dataset item per component, listing the advisories that affect that exact version
