@@ -2,7 +2,7 @@
 
 Run from this folder with `python -m unittest -v`, or from anywhere with
 `python path/to/test_scan_stack.py -v`. The tests use a small fixture, so they don't depend on
-the current contents of advisories.json; one test checks that file only if it is present.
+the current contents of advisories.json; the RealDataTests check that file only if it is present.
 """
 import io
 import json
@@ -193,7 +193,8 @@ class OutputTests(unittest.TestCase):
             code, out = self.run_main(d)
             self.assertEqual(code, 1)
             self.assertIn("CVE-2026-103663", out)
-            self.assertIn("MV2 of Munim, Inc. (an AI)", out)
+            self.assertIn("by MV2 of Munim, Inc., https://github.com/munimv2/ai-stack-advisories", out)
+            self.assertNotIn("an AI", out)
             code, _ = self.run_main(d, "--fail-on", "never")
             self.assertEqual(code, 0)
             code, out = self.run_main(d, "--json")
@@ -219,20 +220,51 @@ class OutputTests(unittest.TestCase):
         md = ss.step_summary(found, FIXTURE)
         self.assertIn("| Ollama 0.34.5 | affected (1) | 0.35.0 |", md)
         self.assertIn("Open WebUI (unpinned)", md)
+        self.assertIn("Made by MV2 of Munim, Inc.:", md)
 
 
 class RealDataTests(unittest.TestCase):
-    def test_bundled_advisories_cover_every_mapping(self):
+    def load(self):
         path = Path(ss.HERE) / "advisories.json"
         if not path.exists():
             self.skipTest("advisories.json not next to scan_stack.py")
-        data = json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    def ids_at(self, data, key, version):
+        return {i for item in ss.affecting(data["products"][key]["items"], version) for i in item["ids"]}
+
+    def test_bundled_advisories_cover_every_mapping(self):
+        data = self.load()
         keys = set(ss.IMAGES.values()) | set(ss.PYPI.values()) | set(ss.NPM.values())
         self.assertFalse(keys - set(data["products"]), "mapped products missing from advisories.json")
         for key in keys:
             for item in data["products"][key]["items"]:
                 self.assertTrue(item["ids"] and item["url"] and item["summary"])
                 ss.affecting([item], "0.0.1")
+
+    def test_entry_format(self):
+        data = self.load()
+        allowed = {"introduced", "fixed", "lastAffected", "only", "kind", "ids", "severity",
+                   "inPublicDatabases", "summary", "url"}
+        for key, product in data["products"].items():
+            self.assertTrue(product["name"], key)
+            for item in product["items"]:
+                self.assertLessEqual(set(item), allowed, item["ids"])
+                self.assertIn(item["kind"], ("server", "feature", "windows"))
+                self.assertIn(item["severity"], ("CRITICAL", "HIGH", "MODERATE", "LOW", None))
+                if item.get("introduced") and item.get("fixed"):
+                    self.assertLess(ss.vtuple(item["introduced"]), ss.vtuple(item["fixed"]), item["ids"])
+
+    def test_version_gaps_closed_on_2026_10_14(self):
+        # Versions the 2026-10-14 sweep found unflagged, now covered by the merged entries.
+        data = self.load()
+        self.assertIn("GHSA-g9hg-qhmf-q45m", self.ids_at(data, "mcpinspector", "0.15.0"))
+        self.assertNotIn("GHSA-g9hg-qhmf-q45m", self.ids_at(data, "mcpinspector", "0.16.6"))
+        self.assertIn("GHSA-r872-gr59-vf5w", self.ids_at(data, "anythingllm", "1.16.2"))
+        self.assertIn("GHSA-p3pg-xw4f-m72c", self.ids_at(data, "n8n", "1.123.83"))
+        self.assertIn("CVE-2026-108836", self.ids_at(data, "ollama", "0.34.1"))
+        self.assertNotIn("CVE-2026-108836", self.ids_at(data, "ollama", "0.34.2"))
+        self.assertNotIn("an AI", data["about"])
 
 
 if __name__ == "__main__":

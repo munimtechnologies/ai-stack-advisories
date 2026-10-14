@@ -1,54 +1,5 @@
 {
   "checked": "2026-10-14",
-  "about": "Published advisories found on 2026-10-14 that advisories.json does not list yet, in the same entry format (introduced/fixed are version bounds, null = from the start or no fixed release; inPublicDatabases=false = OSV.dev had no record on 2026-10-14). They will be merged into advisories.json; until then the Apify Actor, scan_stack.py and the GitHub Action do not read this file. For 10 of the 14, other entries in advisories.json already flag every affected version and only the ID is missing. Versions NOT flagged by advisories.json yet: MCP Inspector 0.14.1 to 0.16.5 (CVE-2025-58444, HIGH); AnythingLLM 1.16.2 and later (GHSA-r872-gr59-vf5w, LOW, no fixed release named); n8n 1.x from 1.123.83 on for GHSA-2r5r-xgvc-rj4p and GHSA-p3pg-xw4f-m72c, whose published ranges (< 2.41.4) take in all 1.x releases without naming a 1.x fix. Kept by MV2 of Munim, Inc. with AI agents; check_freshness.py finds the next ones.",
-  "products": {
-    "vllm": {
-      "name": "vLLM",
-      "items": [
-        {"introduced": "0.20.0", "fixed": "0.30.0", "kind": "feature", "ids": ["GHSA-34qw-q2h2-jp3m"], "severity": "MODERATE", "inPublicDatabases": false, "summary": "Crafted kwargs_data or mm_placeholders sent to the disaggregated multimodal /inference/v1/generate endpoint can crash the engine (remote denial of service). Only matters if you run that endpoint.", "url": "https://github.com/vllm-project/vllm/security/advisories/GHSA-34qw-q2h2-jp3m"},
-        {"introduced": "0.22.0", "fixed": "0.24.0", "kind": "feature", "ids": ["GHSA-w2v2-5662-8v5q", "GHSA-6pgw-f3pv-4h8q", "GHSA-rwfw-xvg3-3937"], "severity": "MODERATE", "inPublicDatabases": false, "summary": "Three ways to kill EngineCore with one request to the Rust gRPC server (Generate/GenerateStream): out-of-vocabulary prompt token IDs, output_candidates.token_ids that bypass the logprob_token_ids limits, and a CandidateTokens.top_n that bypasses max_logprobs (an oversized or wrapping value). Only matters if you run the gRPC server; worse if it is reachable without a credential in front of it.", "url": "https://github.com/vllm-project/vllm/security/advisories/GHSA-rwfw-xvg3-3937"},
-        {"introduced": null, "fixed": "0.31.0", "kind": "server", "ids": ["GHSA-6cxc-2vcg-w5qc"], "severity": "LOW", "inPublicDatabases": false, "summary": "On a shared V1 engine that batches requests, a client's allowed_token_ids allowlist can stay on a recycled batch row, so another client's request is limited to the attacker's chosen tokens while still returning HTTP 200. Needs well-timed concurrent requests. The advisory says the fix (PR #43931) was not in a tagged release as of 0.30.0.", "url": "https://github.com/vllm-project/vllm/security/advisories/GHSA-6cxc-2vcg-w5qc"}
-      ]
-    },
-    "openwebui": {
-      "name": "Open WebUI",
-      "items": [
-        {"introduced": "0.11.0", "fixed": "0.11.4", "kind": "feature", "ids": ["GHSA-whgc-vpjx-m3qh"], "severity": "MODERATE", "inPublicDatabases": false, "summary": "Automation recurrence rules that evade the sub-daily frequency check can stall the whole instance. Only where non-admin users have the automations permission, which is off by default.", "url": "https://github.com/open-webui/open-webui/security/advisories/GHSA-whgc-vpjx-m3qh"},
-        {"introduced": "0.9.6", "fixed": "0.11.4", "kind": "server", "ids": ["GHSA-jx3w-3pqq-7f3w"], "severity": "MODERATE", "inPublicDatabases": false, "summary": "A user who knows a knowledge base's directory ID can see the folder names and owners of knowledge bases they cannot access.", "url": "https://github.com/open-webui/open-webui/security/advisories/GHSA-jx3w-3pqq-7f3w"}
-      ]
-    },
-    "n8n": {
-      "name": "n8n",
-      "items": [
-        {"introduced": null, "fixed": "1.123.83", "kind": "feature", "ids": ["GHSA-3p2g-2wpm-8h3g"], "severity": "MODERATE", "inPublicDatabases": false, "summary": "September 30 batch, 1.x line: a low-privileged user can create a node named __proto__ through the API; when the AI Workflow Builder's connect-nodes operation merges that workflow, the global object prototype is altered process-wide until a restart. Turning off the AI Builder lowers the risk.", "url": "https://github.com/n8n-io/n8n/security/advisories/GHSA-3p2g-2wpm-8h3g"},
-        {"introduced": "2.0.0", "fixed": "2.41.4", "kind": "feature", "ids": ["GHSA-3p2g-2wpm-8h3g"], "severity": "MODERATE", "inPublicDatabases": false, "summary": "September 30 batch, 2.x line: prototype pollution through the AI Workflow Builder's connect-nodes merge (see the 1.x entry).", "url": "https://github.com/n8n-io/n8n/security/advisories/GHSA-3p2g-2wpm-8h3g"},
-        {"introduced": null, "fixed": "2.41.4", "kind": "feature", "ids": ["GHSA-2r5r-xgvc-rj4p", "GHSA-p3pg-xw4f-m72c"], "severity": "MODERATE", "inPublicDatabases": false, "summary": "September 30 batch, Agents module: a user with view access to another project's Agents can pull an agent into their own project by its ID, overwriting it (GHSA-2r5r); a member of the same project can resume another user's agent run, read their private agent chats and approve their pending tool call (GHSA-p3pg). The published ranges (< 2.41.4) take in all 1.x releases and name no 1.x fix, so this entry follows them as written.", "url": "https://github.com/n8n-io/n8n/security/advisories/GHSA-p3pg-xw4f-m72c"},
-        {"introduced": "2.42.0", "fixed": "2.42.1", "kind": "feature", "ids": ["GHSA-3p2g-2wpm-8h3g", "GHSA-2r5r-xgvc-rj4p"], "severity": "MODERATE", "inPublicDatabases": false, "summary": "September 30 batch, 2.42 line: prototype pollution through the AI Workflow Builder (GHSA-3p2g) and cross-project agent takeover by ID (GHSA-2r5r). GHSA-p3pg was already fixed in 2.42.0.", "url": "https://github.com/n8n-io/n8n/security/advisories/GHSA-2r5r-xgvc-rj4p"}
-      ]
-    },
-    "litellm": {
-      "name": "LiteLLM",
-      "items": [
-        {"introduced": null, "fixed": "1.82.0", "kind": "feature", "ids": ["CVE-2026-59821", "GHSA-72m8-9m7m-h278"], "severity": "LOW", "summary": "The create and update endpoints for Custom Code Guardrails skipped the sandbox and checks the test endpoint used, so a user allowed to create or edit guardrails could run Python in the proxy container and reach its secrets. Needs high privileges, unless no master key is set. Fixed in 1.82.0-stable.", "url": "https://github.com/BerriAI/litellm/security/advisories/GHSA-72m8-9m7m-h278"}
-      ]
-    },
-    "dify": {
-      "name": "Dify",
-      "items": [
-        {"introduced": "0.6.7", "fixed": "0.6.8", "kind": "server", "ids": ["GHSA-cg9f-q34p-p9h3"], "severity": "LOW", "inPublicDatabases": false, "summary": "Server-side request forgery through an API Extension endpoint. The maintainers corrected the patched version to 0.6.8.", "url": "https://github.com/langgenius/dify/security/advisories/GHSA-cg9f-q34p-p9h3"}
-      ]
-    },
-    "anythingllm": {
-      "name": "AnythingLLM",
-      "items": [
-        {"introduced": "1.11.2", "fixed": null, "kind": "server", "ids": ["CVE-2026-55611", "GHSA-r872-gr59-vf5w"], "severity": "LOW", "inPublicDatabases": false, "summary": "Incomplete fix for GHSA-p5rf-8p88-979c: in multi-user mode a manager or admin can delete other users' chat-uploaded parsed files in any workspace by cycling through file IDs. The advisory names no fixed release; it was verified on main at commit 6442ea9. introduced is the release that carried the p5rf fix.", "url": "https://github.com/Mintplex-Labs/anything-llm/security/advisories/GHSA-r872-gr59-vf5w"}
-      ]
-    },
-    "mcpinspector": {
-      "name": "MCP Inspector",
-      "items": [
-        {"introduced": null, "fixed": "0.16.6", "kind": "server", "ids": ["CVE-2025-58444", "GHSA-g9hg-qhmf-q45m"], "severity": "HIGH", "summary": "Connecting the Inspector to an untrusted MCP server allows cross-site scripting through a redirect URL the server returns, which through the built-in proxy can lead to command execution on the developer's machine.", "url": "https://github.com/modelcontextprotocol/inspector/security/advisories/GHSA-g9hg-qhmf-q45m"}
-      ]
-    }
-  }
+  "about": "Published advisories that were found in a sweep but are not in advisories.json yet, in the same entry format. Empty: the 14 advisories found on 2026-10-14 were merged into advisories.json the same day. check_freshness.py finds the next ones. Kept by MV2 of Munim, Inc. with AI agents.",
+  "products": {}
 }

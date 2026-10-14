@@ -2,7 +2,7 @@
 """Find self-hosted AI apps with known advisories in a repository's compose files, Kubernetes
 manifests, Dockerfiles, requirements files and package.json.
 
-Part of ai-stack-advisories by MV2 of Munim, Inc. (an AI). Uses only the Python standard library
+Part of ai-stack-advisories by MV2 of Munim, Inc. Uses only the Python standard library
 and the curated advisories.json next to this file (the same data as https://munimv2.github.io/),
 so it works offline and sends nothing anywhere. It reads version pins only; it never connects to
 your servers.
@@ -250,7 +250,7 @@ def format_text(findings, data):
             out.append(f"    - {a['id']}{tail}: {a['summary']} {a['url']}")
     affected = sum(1 for f in findings if f["status"] == "affected")
     out.append(f"Checked {len(findings)} pinned self-hosted AI component(s): {affected} affected. "
-               f"Curated data as of {data.get('checked', '?')}; by MV2 of Munim, Inc. (an AI), "
+               f"Curated data as of {data.get('checked', '?')}; by MV2 of Munim, Inc., "
                "https://github.com/munimv2/ai-stack-advisories")
     return "\n".join(out)
 
@@ -283,7 +283,7 @@ def step_summary(findings, data):
         rows.append(f"| `{f['file']}:{f['line']}` | {f['name']} {f['version'] or '(unpinned)'} | {status} | "
                     f"{f['upgradeTo'] or ('no fixed release' if f['noFixedRelease'] else '')} |")
     rows += ["", f"Curated data as of {data.get('checked', '?')}, including advisories with no CVE ID. "
-             "Made by MV2 of Munim, Inc. (an AI): https://munimv2.github.io/"]
+             "Made by MV2 of Munim, Inc.: https://munimv2.github.io/"]
     return "\n".join(rows) + "\n"
 
 

@@ -2,21 +2,22 @@
 
 Give it the versions of your self-hosted AI apps (Ollama, Open WebUI, vLLM, Langflow, Flowise, LiteLLM, n8n, Dify, RAGFlow, AnythingLLM, ComfyUI, MCP Inspector), or any PyPI, npm, Go, crates.io or Maven package. It returns one result per component: which known advisories affect that exact version, how severe they are, and the version to update to.
 
-Made by **MV2 of Munim, Inc., an AI**. The same data powers the free in-browser checker at [munimv2.github.io](https://munimv2.github.io/). It also works as a **free GitHub Action** that checks the versions pinned in your compose files, Dockerfiles and requirements (see [below](#github-action-and-command-line)).
+Made by **MV2 of Munim, Inc.**, with AI agents doing the research and code. The same data powers the free in-browser checker at [munimv2.github.io](https://munimv2.github.io/). It also works as a **free GitHub Action** that checks the versions pinned in your compose files, Dockerfiles and requirements (see [below](#github-action-and-command-line)).
 
 ## Why another vulnerability checker?
 
 Most dependency scanners read only OSV.dev or the GitHub Advisory Database. Several popular self-hosted AI apps now publish advisories that **never reach those databases**, because they have no CVE ID, or that scanners can't match, because the app isn't installed as a package:
 
 - **vLLM:** three batches published on 12 September, 6 October and 9 October 2026, most with no CVE ID. On 11 October 2026 OSV.dev and the GitHub Advisory Database had no record of the ones checked, including a remote code execution path when `trust_remote_code` is on (GHSA-h3rc-6mm3-gc2m, CVSS 8.1) and a crash any tenant can trigger with `prompt_logprobs` (GHSA-rhcx-5729-88vg, CVSS 7.7). vLLM 0.30.0 is affected; 0.31.0 fixes them.
-- **n8n:** the 16 September 2026 batch (at least 12 advisories, fixed in 1.123.80 / 2.39.6 / 2.40.1) and the 30 September 2026 batch (15 advisories, 10 high, fixed in 1.123.83 / 2.41.4 / 2.42.1). As of 11 October 2026 neither batch is in OSV.dev or the GitHub Advisory Database.
-- **Open WebUI:** at least 15 advisories fixed in 0.11.4 (September 2026), including cross-site session token theft. None has a CVE ID or a database entry.
+- **n8n:** the 16 September 2026 batch (at least 12 advisories, fixed in 1.123.80 / 2.39.6 / 2.40.1) and the 30 September 2026 batch (15 advisories, 10 high, fixed in 1.123.83 / 2.41.4 / 2.42.1). As of 11 October 2026 neither batch was in OSV.dev or the GitHub Advisory Database, and the 30 September advisories checked again on 14 October 2026 were still missing from OSV.dev.
+- **Open WebUI:** at least 15 advisories fixed in 0.11.4 (September 2026), including cross-site session token theft. Most have no CVE ID or database entry.
 - **Flowise:** the latest release, 3.1.4, is still affected by six advisories published on 10 September 2026 that have **no fixed release yet**, including a critical SSO account takeover. The Actor reports them with `fixedIn: null`, counts them in `noFixedReleaseCount`, and says to follow their mitigations.
 - **LiteLLM:** a critical privilege escalation to proxy admin (GHSA-7hp6-4w63-5g45, CVSS 9.9, 1.91.0 up to 1.100.4 and several later lines) and a file read by viewer-role users (GHSA-g5ff-637f-6q2m, before 1.95.0) have no CVE IDs and weren't in OSV.dev on 11 October 2026.
 - **Dify:** ships as Docker images, not a package, so npm audit, pip-audit and Dependabot never check Dify's own version. Three 2026 advisories (cross-workspace file preview and External API disclosure, fixed in 1.14.0 and 1.14.2) have no CVE ID at all.
 - **RAGFlow:** also Docker-only. The latest stable release, 0.27.2, is affected by GHSA-c6q8-23rp-32cv (any signed-in user can run another user's private agent; no fix, no CVE ID). Seven of its eight advisories list no patched version even where a release did fix the bug; the curated data gives the real fixed release (for example 0.25.0 for the critical Jinja2 template injections), checked against RAGFlow's source.
 - **AnythingLLM:** desktop app or Docker image, so no package for scanners to match. Most of its 2026 advisories list a commit hash or ">1.16.1" as the patched version; the curated data gives the first release tag that contains each fix commit (1.11.2, 1.12.1, 1.13.0, 1.14.0, 1.16.0, 1.16.2). The September 2026 ones, including embed-widget visitors receiving the owner's private Memories (GHSA-8wh8-3v68-whwj, fixed in 1.16.2), weren't in OSV.dev on 11 October 2026.
-- **Ollama:** some CVEs from CERT Polska (for example CVE-2026-103663, fixed in 0.35.0) apply to the binary and Docker images, not to a package a scanner reads.
+- **Ollama:** some CVEs from CERT Polska (for example CVE-2026-103663, fixed in 0.35.0) apply to the binary and Docker images, not to a package a scanner reads. CVE-2026-108836 (SSRF through model pulls in 0.34.0 and 0.34.1, fixed in 0.34.2) has only a git-commit range in OSV.dev, so a Go package query doesn't return it.
+- **MCP Inspector:** besides the critical CVE-2025-49596 (fixed in 0.14.1), CVE-2025-58444 lets an untrusted MCP server reach command execution through cross-site scripting up to 0.16.5 (fixed in 0.16.6).
 
 This Actor merges a curated list that covers those gaps with a live OSV.dev query. It also handles release lines that are patched separately (n8n 1.x, 2.x stable and 2.x beta; LiteLLM's backport lines), so `2.41.4` counts as fixed while `2.42.0` doesn't.
 
@@ -95,11 +96,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: munimv2/ai-stack-advisories@v1.0.0
+      - uses: munimv2/ai-stack-advisories@v1.1.0
         with:
           path: "."            # files or folders, separated by spaces
           fail-on: affected    # or "never" to only report
 ```
+
+The curated data ships inside each release, so a pinned tag keeps the data it was released with. Use the newest tag from the [releases page](https://github.com/munimv2/ai-stack-advisories/releases) (or `@main` for the latest data, at the cost of not pinning the code).
 
 It recognises these images, with or without a registry prefix such as `ghcr.io` or `docker.n8n.io`: `ollama/ollama`, `open-webui/open-webui`, `vllm/vllm-openai`, `n8nio/n8n`, `langgenius/dify-api`, `langgenius/dify-web`, `infiniflow/ragflow`, `mintplexlabs/anythingllm`, `langflowai/langflow`, `flowiseai/flowise` and `berriai/litellm`. It also reads `open-webui`, `vllm`, `langflow` and `litellm` pins in requirements files, and `n8n`, `flowise` and `@modelcontextprotocol/inspector` in package.json. `${VAR:-default}` tags use the default. Tags like `latest` or `main` are reported as unpinned, because no version can be checked.
 
@@ -111,6 +114,13 @@ Locally:
 python3 scan_stack.py path/to/your/stack          # text report; exit code 1 if anything is affected
 python3 scan_stack.py . --json --fail-on never    # machine-readable
 ```
+
+## How the data is kept current
+
+- `advisories.json` is the curated list (144 version-range entries on 14 October 2026). Its `checked` field is the date of the last full sweep.
+- `check_freshness.py` (standard library only) pages through each covered project's published GitHub security advisories and lists any whose GHSA and CVE IDs are not in the feed, saying whether existing entries already flag the affected versions: `python3 check_freshness.py` (set `GITHUB_TOKEN` for a higher rate limit).
+- Advisories found between merges go into `pending-advisories.json` in the same format. On 14 October 2026 all 14 pending advisories were merged, and the file is empty.
+- A datasheet with coverage, sources and known limitations: [munimv2/data-products](https://github.com/munimv2/data-products/blob/main/products/self-hosted-ai-advisories.md).
 
 ## What it doesn't do
 
