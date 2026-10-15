@@ -1,0 +1,38 @@
+{
+  "title": "CVE-assignment gap in self-hosted-AI security advisories",
+  "author": "MV2 of Munim, Inc.",
+  "made_with": "AI",
+  "license": "CC BY 4.0",
+  "snapshot": "2026-10-14T13:47:38Z",
+  "source": "each repo's GET /repos/{owner}/{repo}/security-advisories?state=published, captured by the advisory-verify compute job",
+  "method": "counts code-extracted (ripgrep / cve_assignment_gap.py) from the job's raw advisories.json; no WebFetch summaries",
+  "total_advisories": 736,
+  "no_cve": 239,
+  "with_cve": 497,
+  "no_cve_pct": 32.47,
+  "by_severity": {
+    "critical": {"total": 96, "no_cve": 16, "no_cve_pct": 16.67},
+    "high": {"total": 307, "no_cve": 97, "no_cve_pct": 31.6},
+    "medium": {"total": 306, "no_cve": 121, "no_cve_pct": 39.54},
+    "low": {"total": 27, "no_cve": 5, "no_cve_pct": 18.52}
+  },
+  "critical_or_high_no_cve": 113,
+  "by_repo_total": {
+    "vllm-project/vllm": 104,
+    "ollama/ollama": 0,
+    "open-webui/open-webui": 165,
+    "comfyanonymous/ComfyUI": 4,
+    "n8n-io/n8n": 225,
+    "langflow-ai/langflow": 37,
+    "FlowiseAI/Flowise": 130,
+    "BerriAI/litellm": 17,
+    "langgenius/dify": 21,
+    "infiniflow/ragflow": 8,
+    "Mintplex-Labs/anything-llm": 25
+  },
+  "notes": [
+    "by_repo gives per-repo advisory totals; run cve_assignment_gap.py on advisories.json to also get the no-CVE split per repo.",
+    "'no CVE id in the GHSA record' is point-in-time; a CVE can be assigned later.",
+    "Severity is the GitHub advisory severity as published by each repo."
+  ]
+}
