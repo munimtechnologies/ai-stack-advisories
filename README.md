@@ -17,7 +17,7 @@ Most dependency scanners read only OSV.dev or the GitHub Advisory Database. Seve
 - **RAGFlow:** also Docker-only. The latest stable release, 0.27.2, is affected by GHSA-c6q8-23rp-32cv (any signed-in user can run another user's private agent; no fix, no CVE ID). Seven of its eight advisories list no patched version even where a release did fix the bug; the curated data gives the real fixed release (for example 0.25.0 for the critical Jinja2 template injections), checked against RAGFlow's source.
 - **AnythingLLM:** desktop app or Docker image, so no package for scanners to match. Most of its 2026 advisories list a commit hash or ">1.16.1" as the patched version; the curated data gives the first release tag that contains each fix commit (1.11.2, 1.12.1, 1.13.0, 1.14.0, 1.16.0, 1.16.2). The September 2026 ones, including embed-widget visitors receiving the owner's private Memories (GHSA-8wh8-3v68-whwj, fixed in 1.16.2), weren't in OSV.dev on 11 October 2026.
 - **Ollama:** some CVEs from CERT Polska (for example CVE-2026-103663, fixed in 0.35.0) apply to the binary and Docker images, not to a package a scanner reads. CVE-2026-108836 (SSRF through model pulls in 0.34.0 and 0.34.1, fixed in 0.34.2) has only a git-commit range in OSV.dev, so a Go package query doesn't return it.
-- **MCP Inspector:** besides the critical CVE-2025-49596 (fixed in 0.14.1), CVE-2025-58444 lets an untrusted MCP server reach command execution through cross-site scripting up to 0.16.5 (fixed in 0.16.6).
+- **MCP Inspector:** besides the critical CVE-2025-49596 (fixed in 0.14.1), CVE-2025-58444 lets an untrusted MCP server reach command execution through cross-site scripting up to 0.16.5 (fixed in 0.16.6). On 21 October 2026 it published nine more advisories with no CVE IDs: through 1.0.2, a malicious MCP server you connect to can make the Inspector run commands (two critical, CVSS 9.6; fixed in 1.0.3), and 2.0.0-2.11.0 have their own, including code execution on Windows and WSL through the OAuth URL (fixed in 2.12.0).
 
 This Actor merges a curated list that covers those gaps with a live OSV.dev query. It also handles release lines that are patched separately (n8n 1.x, 2.x stable and 2.x beta; LiteLLM's backport lines), so `2.41.4` counts as fixed while `2.42.0` doesn't.
 
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: munimtechnologies/ai-stack-advisories@v1.1.0
+      - uses: munimtechnologies/ai-stack-advisories@v1.2.0
         with:
           path: "."            # files or folders, separated by spaces
           fail-on: affected    # or "never" to only report
@@ -117,7 +117,7 @@ python3 scan_stack.py . --json --fail-on never    # machine-readable
 
 ## How the data is kept current
 
-- `advisories.json` is the curated list (144 version-range entries on 14 October 2026). Its `checked` field is the date of the last full sweep.
+- `advisories.json` is the curated list (201 version-range entries on 30 October 2026). Its `checked` field is the date of the last full sweep.
 - `check_freshness.py` (standard library only) pages through each covered project's published GitHub security advisories and lists any whose GHSA and CVE IDs are not in the feed, saying whether existing entries already flag the affected versions: `python3 check_freshness.py` (set `GITHUB_TOKEN` for a higher rate limit).
 - Advisories found between merges go into `pending-advisories.json` in the same format. On 14 October 2026 all 14 pending advisories were merged, and the file is empty.
 - A datasheet with coverage, sources and known limitations: [munimtechnologies/data-products](https://github.com/munimtechnologies/data-products/blob/main/products/self-hosted-ai-advisories.md).
