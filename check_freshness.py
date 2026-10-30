@@ -113,6 +113,25 @@ def parse_range(text):
     return lo, hi, hi_incl
 
 
+def _with_patched(rng, vuln):
+    """An open-ended range whose patched_versions names exactly one version ends at that version.
+
+    Many vLLM and n8n advisories give only a lower bound (">=0.1.0") as the range and put the fix in
+    patched_versions ("0.10.1.1"). Several patched versions (one per release line) stay open-ended."""
+    if not rng or rng[1] is not None:
+        return rng
+    parts = [p.strip() for p in (vuln.get("patched_versions") or "").split(",") if p.strip()]
+    if len(parts) != 1:
+        return rng
+    m = re.fullmatch(r"(?:>=\s*)?v?(\S+)", parts[0])
+    if not m or not _looks_like_version(m.group(1)):
+        return rng
+    lo = rng[0]
+    if lo is not None and version_key(m.group(1)) <= version_key(lo):
+        return rng
+    return (lo, m.group(1), False)
+
+
 def _line_start(version):
     numbers = re.findall(r"\d+", version)
     if len(numbers) < 2:
@@ -127,7 +146,7 @@ def advisory_ranges(advisory, app):
     own = [v for v in vulns if ((v.get("package") or {}).get("name") or "").lower() in names]
     ranges = []
     for vuln in own or vulns:
-        parsed = parse_range(vuln.get("vulnerable_version_range"))
+        parsed = _with_patched(parse_range(vuln.get("vulnerable_version_range")), vuln)
         if parsed is None:
             return None
         ranges.append(parsed)

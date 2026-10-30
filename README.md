@@ -118,7 +118,7 @@ python3 scan_stack.py . --json --fail-on never    # machine-readable
 ## How the data is kept current
 
 - `advisories.json` is the curated list (201 version-range entries on 30 October 2026). Its `checked` field is the date of the last full sweep.
-- `check_freshness.py` (standard library only) pages through each covered project's published GitHub security advisories and lists any whose GHSA and CVE IDs are not in the feed, saying whether existing entries already flag the affected versions: `python3 check_freshness.py` (set `GITHUB_TOKEN` for a higher rate limit).
+- `check_freshness.py` (standard library only) pages through each covered project's published GitHub security advisories and lists any whose GHSA and CVE IDs are not in the feed, saying whether existing entries already flag the affected versions (an advisory whose range has no upper bound but whose `patched_versions` names one version counts as fixed in that version): `python3 check_freshness.py` (set `GITHUB_TOKEN` for a higher rate limit).
 - Advisories found between merges go into `pending-advisories.json` in the same format. On 14 October 2026 all 14 pending advisories were merged, and the file is empty.
 - A datasheet with coverage, sources and known limitations: [munimtechnologies/data-products](https://github.com/munimtechnologies/data-products/blob/main/products/self-hosted-ai-advisories.md).
 
