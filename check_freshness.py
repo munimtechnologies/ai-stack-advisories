@@ -13,6 +13,9 @@ Range check notes:
 - When an advisory lists several ranges for the same package that all lack a
   lower bound (the way n8n and LiteLLM publish per release line), every range but
   the lowest is read as starting at its own release line (major.minor.0).
+- A range written as several release lines in one string ("< 1.123.22, >= 2.0.0
+  < 2.9.3", as n8n does) is read as a union: a lower bound that follows an upper
+  bound starts a new range. Comparators separated only by a space are read too.
 - Free-text ranges ("all versions carrying the ... fix") are reported as
   "range not parsed" for a person to check.
 
@@ -113,6 +116,72 @@ def parse_range(text):
     return lo, hi, hi_incl
 
 
+# One comparator and its version, after any spaces or commas. A version can't hold a comparator
+# character, so "<1.120.3" splits and a bare ">=" is never read as a version.
+_COMPARATOR = re.compile(r"[\s,]*(>=|>|<=|<|=)?\s*([^\s,<>=]+)")
+
+
+def _comparators(text):
+    """Return [(op, version), ...] covering the whole text, or None if anything else is left over."""
+    pairs = []
+    pos = 0
+    while pos < len(text):
+        match = _COMPARATOR.match(text, pos)
+        if not match:
+            return None
+        pairs.append((match.group(1) or "=", match.group(2)))
+        pos = match.end()
+    return pairs
+
+
+def parse_ranges(text):
+    """Return a list of (lo, hi, hi_inclusive) for a range that may hold several release lines, or None.
+
+    n8n writes "< 1.123.22, >= 2.0.0 < 2.9.3, >= 2.10.0 < 2.10.1" for three release lines, and some
+    advisories leave out the comma (">= 0.187.0 <1.120.3"). A lower bound that follows an upper bound
+    starts a new range; any word that isn't a version makes the whole text unparsed."""
+    text = (text or "").strip()
+    if not text:
+        return None
+    pairs = _comparators(text)
+    if pairs is None:
+        return None
+    ranges = []
+    lo = hi = None
+    hi_incl = False
+    for op, ver in pairs:
+        if not _looks_like_version(ver):
+            return None
+        if op in (">=", ">"):
+            if hi is not None:
+                ranges.append((lo, hi, hi_incl))
+                hi, hi_incl = None, False
+            elif lo is not None:
+                return None
+            lo = ver
+        elif op in ("<", "<="):
+            if hi is not None:
+                return None
+            hi, hi_incl = ver, op == "<="
+        else:
+            if lo is not None and hi is None:
+                return None
+            if hi is not None:
+                ranges.append((lo, hi, hi_incl))
+            ranges.append((ver, ver, True))
+            lo = hi = None
+            hi_incl = False
+    if lo is not None or hi is not None:
+        ranges.append((lo, hi, hi_incl))
+    return ranges or None
+
+
+def _inverted(rng):
+    """True for a range whose lower bound is above its upper bound ("< 1.123.8, >= 2.0.0" read as AND)."""
+    lo, hi, _ = rng
+    return lo is not None and hi is not None and version_key(lo) > version_key(hi)
+
+
 def _with_patched(rng, vuln):
     """An open-ended range whose patched_versions names exactly one version ends at that version.
 
@@ -146,10 +215,12 @@ def advisory_ranges(advisory, app):
     own = [v for v in vulns if ((v.get("package") or {}).get("name") or "").lower() in names]
     ranges = []
     for vuln in own or vulns:
-        parsed = _with_patched(parse_range(vuln.get("vulnerable_version_range")), vuln)
-        if parsed is None:
+        text = vuln.get("vulnerable_version_range")
+        parsed = parse_range(text)
+        found = [parsed] if parsed is not None and not _inverted(parsed) else parse_ranges(text)
+        if found is None:
             return None
-        ranges.append(parsed)
+        ranges.extend(_with_patched(r, vuln) for r in found)
     if not ranges:
         return None
     if len(ranges) > 1 and all(r[0] is None and r[1] is not None for r in ranges):
