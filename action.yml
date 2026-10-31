@@ -1,5 +1,5 @@
 name: "Self-hosted AI stack advisories"
-description: "Flag pinned Ollama, Open WebUI, vLLM, n8n, Dify, RAGFlow, AnythingLLM, Langflow, Flowise and LiteLLM versions with known advisories, even ones with no CVE ID."
+description: "Flag pinned Ollama, Open WebUI, vLLM, n8n, Dify and other self-hosted AI versions that have known security advisories"
 author: "MV2 of Munim, Inc."
 branding:
   icon: "shield"
