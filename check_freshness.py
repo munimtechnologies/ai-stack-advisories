@@ -18,6 +18,12 @@ Range check notes:
   bound starts a new range. Comparators separated only by a space are read too.
 - Free-text ranges ("all versions carrying the ... fix") are reported as
   "range not parsed" for a person to check.
+- A single range that ends below the one version patched_versions names
+  ("<= 0.25.1" with patched "0.32.0", or a bare "0.26.0") counts as affected up
+  to that version, because the releases in between don't have the fix; OSV.dev
+  reads such advisories the same way. "=>" in patched_versions is read as ">=".
+- A version with a leading zero ("< 030.0") is reported as "range not parsed":
+  it is almost always a typo, and read literally it would cover every release.
 
 Usage:
   python check_freshness.py [--feed advisories.json] [--pending pending-advisories.json]
@@ -89,7 +95,10 @@ def version_key(text):
 
 
 def _looks_like_version(text):
-    return re.fullmatch(r"v?\d[0-9A-Za-z.+\-]*", text) is not None
+    if re.fullmatch(r"v?\d[0-9A-Za-z.+\-]*", text) is None:
+        return False
+    # "030.0" (vLLM's GHSA-2phq-3phc-84px) is a typo, not a version: read literally it covers every release.
+    return re.search(r"(?:^v?|\.)0\d", text) is None
 
 
 def parse_range(text):
@@ -182,23 +191,36 @@ def _inverted(rng):
     return lo is not None and hi is not None and version_key(lo) > version_key(hi)
 
 
-def _with_patched(rng, vuln):
-    """An open-ended range whose patched_versions names exactly one version ends at that version.
-
-    Many vLLM and n8n advisories give only a lower bound (">=0.1.0") as the range and put the fix in
-    patched_versions ("0.10.1.1"). Several patched versions (one per release line) stay open-ended."""
-    if not rng or rng[1] is not None:
-        return rng
+def _single_patched(vuln):
+    """The one version patched_versions names (">= 0.32.0", "=> 0.26.0" or "0.32.0"), else None."""
     parts = [p.strip() for p in (vuln.get("patched_versions") or "").split(",") if p.strip()]
     if len(parts) != 1:
-        return rng
-    m = re.fullmatch(r"(?:>=\s*)?v?(\S+)", parts[0])
+        return None
+    m = re.fullmatch(r"(?:(?:>=|=>)\s*)?v?(\S+)", parts[0])
     if not m or not _looks_like_version(m.group(1)):
+        return None
+    return m.group(1)
+
+
+def _with_patched(rng, vuln, gap=False):
+    """End a range at the one version patched_versions names, when the range stops short of it.
+
+    Many vLLM and n8n advisories give only a lower bound (">=0.1.0") as the range and put the fix in
+    patched_versions ("0.10.1.1"). Several patched versions (one per release line) stay open-ended.
+    With gap=True (the advisory has a single range), a range whose upper bound is below the patched
+    version ("<= 0.25.1" with patched "0.32.0", or a bare "0.26.0") is extended to it: no release
+    before the patched one has the fix."""
+    if not rng:
         return rng
-    lo = rng[0]
-    if lo is not None and version_key(m.group(1)) <= version_key(lo):
+    patched = _single_patched(vuln)
+    if patched is None:
         return rng
-    return (lo, m.group(1), False)
+    lo, hi, _ = rng
+    if lo is not None and version_key(patched) <= version_key(lo):
+        return rng
+    if hi is None or (gap and version_key(patched) > version_key(hi)):
+        return (lo, patched, False)
+    return rng
 
 
 def _line_start(version):
@@ -214,13 +236,15 @@ def advisory_ranges(advisory, app):
     names = PACKAGES.get(app, set())
     own = [v for v in vulns if ((v.get("package") or {}).get("name") or "").lower() in names]
     ranges = []
-    for vuln in own or vulns:
+    chosen = own or vulns
+    for vuln in chosen:
         text = vuln.get("vulnerable_version_range")
         parsed = parse_range(text)
         found = [parsed] if parsed is not None and not _inverted(parsed) else parse_ranges(text)
         if found is None:
             return None
-        ranges.extend(_with_patched(r, vuln) for r in found)
+        single = len(chosen) == 1 and len(found) == 1
+        ranges.extend(_with_patched(r, vuln, gap=single) for r in found)
     if not ranges:
         return None
     if len(ranges) > 1 and all(r[0] is None and r[1] is not None for r in ranges):
