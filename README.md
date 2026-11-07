@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: munimtechnologies/ai-stack-advisories@v1.2.4
+      - uses: munimtechnologies/ai-stack-advisories@v1.2.5
         with:
           path: "."            # files or folders, separated by spaces
           fail-on: affected    # or "never" to only report
@@ -117,7 +117,7 @@ python3 scan_stack.py . --json --fail-on never    # machine-readable
 
 ## How the data is kept current
 
-- `advisories.json` is the curated list (207 version-range entries on 6 November 2026). Its `checked` field is the date of the last full sweep. An entry's `severity` is the highest rating among the advisories it lists: the project's own GitHub advisory rating, or for CVE-only entries the CVSS rating published for the CVE, in GitHub's words (LOW, MODERATE, HIGH, CRITICAL).
+- `advisories.json` is the curated list (208 version-range entries on 7 November 2026). Its `checked` field is the date of the last full sweep. An entry's `severity` is the highest rating among the advisories it lists: the project's own GitHub advisory rating, or for CVE-only entries the CVSS rating published for the CVE, in GitHub's words (LOW, MODERATE, HIGH, CRITICAL).
 - `check_freshness.py` (standard library only) pages through each covered project's published GitHub security advisories and lists any whose GHSA and CVE IDs are not in the feed, saying whether existing entries already flag the affected versions (an advisory whose range has no upper bound, or whose single range ends below the one version its `patched_versions` names, counts as affected until that version, because the releases in between don't have the fix; a version with a leading zero, such as vLLM's `< 030.0`, is reported as not parsed; a range that lists several release lines in one string, the way n8n writes them, is read as their union): `python3 check_freshness.py` (set `GITHUB_TOKEN` for a higher rate limit).
 - Advisories found between merges go into `pending-advisories.json` in the same format. On 14 October 2026 all 14 pending advisories were merged, and the file is empty.
 - A datasheet with coverage, sources and known limitations: [munimtechnologies/data-products](https://github.com/munimtechnologies/data-products/blob/main/products/self-hosted-ai-advisories.md).
